@@ -76,7 +76,7 @@ if __name__ == "__main__":
     from transformers import AutoProcessor
     
     device = "cuda" if torch.cuda.is_available() else "cpu"
-    
+
     # 1. 우리가 아까 구워둔 4,000개 데이터셋 불러오기
     try:
         dataset = load_from_disk("./data/waveform")
@@ -102,8 +102,8 @@ if __name__ == "__main__":
     
     print("\n💥 Running PGD-5 Attack on Korean Sample...")
     adv_audio, noise = attacker.attack(
-        input_waveform=input_waveform, # 수정됨
-        labels=labels,                 # 수정됨
+        input_waveform=input_waveform, 
+        labels=labels,                 
         eps=0.005, 
         alpha=0.001, 
         iters=5

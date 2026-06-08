@@ -1,6 +1,7 @@
 import os
 import json
 import torch
+import soundfile as sf
 from tqdm import tqdm
 from datasets import load_from_disk
 from transformers import AutoProcessor
@@ -8,6 +9,8 @@ from src.attack import AudioPGDAttacker
 
 def main():
     device = "cuda" if torch.cuda.is_available() else "cpu"
+    MAX_SAMPLES_PER_LANG = 10
+
     
     print("📦 Loading dataset and base models...")
     dataset = load_from_disk("./data/waveform")
@@ -34,8 +37,9 @@ def main():
             processor.tokenizer.set_target_lang(mms_code)
             
             lang_samples = [s for s in dataset if s['lang_tag'] == lang_tag]
-            
-            for sample in tqdm(lang_samples, desc=f"Attacking {lang_tag.upper()}"):
+            lang_samples = lang_samples[:MAX_SAMPLES_PER_LANG]  # 최대 샘플 수 제한
+
+            for i, sample in enumerate(tqdm(lang_samples, desc=f"Attacking {lang_tag.upper()}")):
                 input_waveform = sample['audio']['array']
                 ground_truth = sample['raw_transcription'] 
                 labels = processor(text=ground_truth).input_ids
@@ -66,6 +70,18 @@ def main():
                 print(f" 🔴 공격 후 예측 (Adv)  : {adv_pred}")
                 print("-" * 60)
 
+
+                orig_dir = os.path.join(output_dir, lang_tag, "orig")  # 예: ./data/attack_results/ko/orig
+                adv_dir = os.path.join(output_dir, lang_tag, "adv")    # 예: ./data/attack_results/ko/adv
+
+                os.makedirs(orig_dir, exist_ok=True)
+                os.makedirs(adv_dir, exist_ok=True)
+
+                orig_file_path = os.path.join(orig_dir, f"{lang_tag}_{i:04d}_clean.wav")
+                adv_file_path = os.path.join(adv_dir, f"{lang_tag}_{i:04d}_adv.wav")
+
+                sf.write(orig_file_path, input_waveform, 16000)
+                sf.write(adv_file_path, adv_audio, 16000)
     print(f"\n✅ 모든 공격 완료! 결과가 실시간으로 저장되었습니다: {output_path}")
 
 if __name__ == "__main__":
