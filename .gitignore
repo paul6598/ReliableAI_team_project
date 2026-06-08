@@ -1,14 +1,35 @@
-# 대용량 데이터 및 결과 파일 제외 
-data/waveform/
-
-# 파이썬 가상환경 및 캐시 파일 제외
+# Python
 __pycache__/
 *.pyc
-.pytest_cache/
+*.pyo
+*.pyd
+.ipynb_checkpoints/
+
+# Environments
 .venv/
 venv/
-miniconda3/
+.env/
 
-# IDE 설정 파일 제외
-.vscode/
-.idea/
+# Logs
+logs/
+*.log
+
+# Checkpoints / model outputs
+checkpoints/
+*.pt
+*.pth
+*.ckpt
+*.safetensors
+
+# Data artifacts
+data/waveform/
+data/adv_wavs/
+data/fake_adv_wavs/
+data/attack_results/
+*.wav
+*.flac
+*.mp3
+
+# OS
+.DS_Store
+Thumbs.db
